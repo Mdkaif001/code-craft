@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  DetailedHTMLProps,
+  HTMLAttributes,
+} from "react";
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { api } from "../../../../convex/_generated/api";
 import { useAction } from "convex/react";
@@ -10,6 +16,35 @@ import ReactMarkDown from "react-markdown";
 
 type FixWithAIDialogProps = {
   onClose: () => void;
+};
+
+const PreBlock = (
+  props: DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement>
+) => {
+  const codeRef = useRef<HTMLPreElement>(null);
+
+  const handleCopy = () => {
+    if (codeRef.current) {
+      const codeText = codeRef.current.textContent || "";
+      navigator.clipboard.writeText(codeText);
+      toast.success("Code copied!");
+    }
+  };
+
+  return (
+    <div className="relative overflow-auto w-full my-3 bg-[#232334] p-4 rounded-lg border border-[#313244]">
+      <div className="absolute top-2 right-2 flex space-x-1">
+        <button
+          onClick={handleCopy}
+          className="bg-[#313244] hover:bg-[#414156] p-1 rounded text-xs text-white transition"
+          title="Copy code"
+        >
+          <Copy className="w-3 h-3" />
+        </button>
+      </div>
+      <pre ref={codeRef} {...props} className="pt-4" />
+    </div>
+  );
 };
 
 function AIDialog({ onClose }: FixWithAIDialogProps) {
@@ -59,7 +94,9 @@ function AIDialog({ onClose }: FixWithAIDialogProps) {
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-start pointer-events-auto">
       <div
-        className={`bg-[#1e1e2e] border-r border-[#313244] h-full w-full max-w-2xl shadow-lg flex flex-col transition-transform duration-300 ease-in-out ${isVisible ? "translate-x-0" : "-translate-x-full"}`}
+        className={`bg-[#1e1e2e] border-r border-[#313244] h-full w-full max-w-2xl shadow-lg flex flex-col transition-transform duration-300 ease-in-out ${
+          isVisible ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#313244]">
@@ -91,32 +128,8 @@ function AIDialog({ onClose }: FixWithAIDialogProps) {
               <div className="text-sm overflow-auto leading-7">
                 <ReactMarkDown
                   components={{
-                    pre: ({ node, ...props }) => {
-                      const codeRef = React.useRef<HTMLPreElement>(null);
-
-                      return (
-                        <div className="relative overflow-auto w-full my-3 bg-[#232334] p-4 rounded-lg border border-[#313244]">
-                          <div className="absolute top-2 right-2 flex space-x-1">
-                            <button
-                              onClick={() => {
-                                if (codeRef.current) {
-                                  const codeText =
-                                    codeRef.current.textContent || "";
-                                  navigator.clipboard.writeText(codeText);
-                                  toast.success("Code copied!");
-                                }
-                              }}
-                              className="bg-[#313244] hover:bg-[#414156] p-1 rounded text-xs text-white transition"
-                              title="Copy code"
-                            >
-                              <Copy className="w-3 h-3" />
-                            </button>
-                          </div>
-                          <pre ref={codeRef} {...props} className="pt-4" />
-                        </div>
-                      );
-                    },
-                    code: ({ node, ...props }) => (
+                    pre: PreBlock,
+                    code: ({ ...props }) => (
                       <code
                         className="bg-[#232334] px-1 py-0.5 rounded-md"
                         {...props}

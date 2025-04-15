@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import AIDialog from "./AIDialog";
 
 function OutputPanel() {
-  const { output, error, isRunning, getCode, language } = useCodeEditorStore();
+  const { output, error, isRunning } = useCodeEditorStore();
   const [isCopied, setIsCopied] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
